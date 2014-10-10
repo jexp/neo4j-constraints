@@ -1,9 +1,23 @@
-== Optional Schema Constraints for Neo4j
+== Neo4j Plugin for Optional Schema Constraints
 
-This is alpha-state, please use with care on toy-stores only. No guarantees whatsoever.
+This project is a plugin to Neo4j that allows you to describe constraints as graph patterns with a cardinality. This gives you the ability to enforce an optional schema by describing patterns as rules.
 
+----
+// Many people can work for only one company
+CONSTRAIN (:Person)-[:WORKS_FOR]->(:Company) TO many : 1
+----
+
+Notes:
+
+This Neo4j plugin is experimental and in an alpha state. Early adopters should use with caution and test with care on toy-stores only.
+
+Do not use this plugin in a production environment. No warranties are provided whatsoever.
+
+Please provide feedback and your ideas using GitHub issues.
 
 === Build & Install
+
+Follow these directions to build this plugin, install it, and start Neo4j.
 
 [source,shell]
 ----
@@ -16,29 +30,37 @@ cp target/constraints-2.1-SNAPSHOT.jar /path/to/neo4j-community-2.1.5/plugins
 
 === Usage
 
-There is a new shell command called `constrain`
+There is a new shell command called `CONSTRAIN`
 
-Currently you can only _add_ cardinality constraints.
+You can use this new command in order to _add_ cardinality constraints.
 
-Here are some examples:
+As an example:
 
 ----
-CONSTRAIN (:Person)-[:WORKS_FOR]-> (:Company) TO many : 1
+// Many people can work for only one company
+CONSTRAIN (:Person)-[:WORKS_FOR]->(:Company) TO many : 1
+
+// 1 to 3 people can report to no more than one manager or no manager (in the case of the CEO)
 CONSTRAIN (:Person)-[:REPORTS_TO]->(:Manager) TO 1..3 : 0..1
-CONSTRAIN (:Person)-[MARRIED_TO]-  (:Person)  TO one : one
+
+// One person can only be married to one other person
+CONSTRAIN (:Person)-[:MARRIED_TO]-(:Person) TO one : one
 ----
 
 === How does it work?
 
-Using a Neo4j Shell command for adding cardinality constraints and a transaction-event-handler to enforce them.
-The constraints are stored in a graph-property and so propagated across a cluster.
+When using the Neo4j Shell from command line, you can describe patterns with a cardinality constraint. A transaction-event-handler is then used to enforce these constraints.
 
-The TX-Handler only looks at nodes with the relevant labels and checks the degree for those relationship-types,
-direction and optionally end-node-labels.
-It throws an exception if the degree min or max for one of the two sides is violated.
+==== Where are the constraints stored?
+
+The constraints are stored in a `graph-property` and propagated across a cluster (in the case you're running Neo4j for High Availability).
+
+The `TX-Handler` only looks at nodes with the relevant labels and checks the degree for those relationship-types, direction and optionally end-node-labels.
+
+An exception is thrown if the degree `min` or `max` for one of the two sides of a pattern encounters a violation.
 
 === Next Steps
 
-* property-type constraints
-* property value constraints (formats, min, max, min-length, max-length, defaults?)
-* ???
+* `property-type` constraints for qualified relationships and type properties on nodes
+* Node and relationship property value constraints (formats, min, max, min-length, max-length, defaults?)
+* Have suggestions? Please provide any feedback as a GitHub issue
