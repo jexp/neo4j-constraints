@@ -61,6 +61,6 @@ An exception is thrown if the degree `min` or `max` for one of the two sides of 
 
 === Next Steps
 
-* `property-type` constraints for qualified relationships and type properties on nodes
+* `property-type` constraints, eg. `constraint (:Person {name}) TO string[5..30]`
 * Node and relationship property value constraints (formats, min, max, min-length, max-length, defaults?)
 * Have suggestions? Please provide any feedback as a GitHub issue
